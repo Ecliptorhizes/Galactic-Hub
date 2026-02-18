@@ -14,23 +14,38 @@ local HubService = Knit.CreateService({
 })
 
 function HubService:KnitInit()
-    self.Client.RequestQuickPlay:Connect(function(player)
+    self.Client.RequestQuickPlay:Connect(function(player, placeKey)
         if RunService:IsStudio() then
             self.Client.TeleportFailed:Fire(player, "Cannot teleport in Roblox Studio")
             return
         end
 
-        local placeId = HubConfig.PlaceIds.Coruscant
-        if not placeId or placeId == 0 then
-            self.Client.TeleportFailed:Fire(player, "Coruscant place not configured")
+        if placeKey ~= "Coruscant" and placeKey ~= "Ilum" then 
+            self.Client.TeleportFailed:Fire(player, "Invalid place: " .. tostring(placeKey))
             return
         end
+
+        if placeKey == "Ilum" and not HubConfig.IlumEnabled then
+            self.Client.TeleportFailed:Fire(player, "Ilum is not ready yet")
+            return
+        end
+
+        local placeId = HubConfig.PlaceIds[placeKey]
+        if not placeId or placeId == 0 then
+            self.Client.TeleportFailed:Fire(player, placeKey .. " place not configured")
+            return
+        end
+
+        print("[HubService] QuickPlay: " .. placeKey .. " -> PlaceId " .. tostring(placeId) .. " (player: " .. player.Name .. ")")
 
         local success, err = pcall(function()
             TeleportService:TeleportAsync(placeId, { player })
         end)
 
-        if not success then
+        if success then
+            print("[HubService] Teleport initiated to " .. placeKey)
+        else
+            warn("[HubService] Teleport failed:", err)
             self.Client.TeleportFailed:Fire(player, tostring(err))
         end
     end)

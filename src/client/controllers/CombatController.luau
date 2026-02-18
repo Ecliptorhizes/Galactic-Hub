@@ -10,7 +10,7 @@ local CombatController = Knit.CreateController({
 
 function CombatController:KnitStart()
     local CombatService = Knit.GetService("CombatService")
-    local player = game.Players.LocalPlayer
+    local _player = game.Players.LocalPlayer
 
     -- Listen for server broadcasts (everyone sees these)
     CombatService.EquipChanged:Connect(function(targetPlayer, equipped)
@@ -36,7 +36,7 @@ function CombatController:KnitStart()
 end 
 
 
-function CombatController:PlayEquipAnimation(targetPlayer. equipped)
+function CombatController:PlayEquipAnimation(targetPlayer, equipped)
     -- Load and play animation on targetPlayer's Humanoid
     -- Use CombatConfig.Animation.Equip / Unequip 
 end 

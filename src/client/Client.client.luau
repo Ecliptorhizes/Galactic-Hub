@@ -68,32 +68,36 @@ local function run()
     setProgress(30)
 
     local Knit = require(ReplicatedStorage.Packages.Knit)
-    local PlaceIds = require(ReplicatedStorage.Shared.modules.Hub.Config).PlaceIds
+    local HubConfig = require(ReplicatedStorage.Shared.modules.Hub.Config)
+    local PlaceIds = HubConfig.PlaceIds
 
     setProgress(50)
 
-    local isHub = (game.PlaceId == PlaceIds.Hub)
+    local isHub = table.find(HubConfig.HubPlaceIds or { PlaceIds.Hub }, game.PlaceId) ~= nil
 
     local clientFolder = script.Parent
     local controllersFolder = clientFolder:FindFirstChild("controllers") or player.PlayerScripts:FindFirstChild("controllers")
 
-    if controllersFolder then
-        if isHub then
-            local hubController = controllersFolder:FindFirstChild("HubController")
-            if hubController then
-                Knit.AddControllers(hubController)
-            end
+    if not controllersFolder then
+        warn("[Client] ERROR: controllers folder not found. HubController will not load. Check Rojo sync (Client should have controllers/HubController).")
+    elseif isHub then
+        local hubController = controllersFolder:FindFirstChild("HubController")
+        if hubController then
+            require(hubController)
         else
-            local combatController = controllersFolder:FindFirstChild("CombatController")
-            if combatController then
-                Knit.AddControllers(combatController)
-            end
+            warn("[Client] ERROR: HubController module not found in controllers folder.")
+        end
+    else
+        local combatController = controllersFolder:FindFirstChild("CombatController")
+        if combatController then
+            require(combatController)
         end
     end
 
     setProgress(70)
 
     Knit.Start():await()
+
     setProgress(90)
 
     if not player.Character then

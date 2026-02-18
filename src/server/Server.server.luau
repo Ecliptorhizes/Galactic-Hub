@@ -2,9 +2,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local PlaceIds = require(ReplicatedStorage.Shared.modules.Hub.Config).PlaceIds
+local HubConfig = require(ReplicatedStorage.Shared.modules.Hub.Config)
+local PlaceIds = HubConfig.PlaceIds
 
-local isHub = (game.PlaceId == PlaceIds.Hub)
+local isHub = table.find(HubConfig.HubPlaceIds or { PlaceIds.Hub }, game.PlaceId) ~= nil
 
 -- Resolve services folder (works whether script is in Server folder or directly in ServerScriptService)
 local serverFolder = script.Parent
@@ -12,18 +13,16 @@ local servicesFolder = serverFolder:FindFirstChild("services") or ServerScriptSe
 
 if servicesFolder then
     if isHub then
-        local hubService = servicesFolder:FindFirstChild("HubService")
-        if hubService then
-            Knit.AddServices(hubService)
+        local hubFolder = servicesFolder:FindFirstChild("Hub")
+        if hubFolder then
+            Knit.AddServices(hubFolder)
         end
     else
-        local combatService = servicesFolder:FindFirstChild("CombatService")
-        if combatService then
-            Knit.AddServices(combatService)
+        local combatFolder = servicesFolder:FindFirstChild("Combat")
+        if combatFolder then
+            Knit.AddServices(combatFolder)
         end
     end
 end
 
 Knit.Start():catch(warn)
-
-

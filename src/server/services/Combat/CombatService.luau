@@ -1,5 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(game.ReplicatedStorage.Packages.Knit)
+local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local CombatService = Knit.CreateService({
     Name = "CombatService",
@@ -9,12 +9,12 @@ local CombatService = Knit.CreateService({
     },
 })
 
--- Player state: [Player] = { equipped: boolean, ignite: boolean }
+-- Player state: [Player] = { equipped: boolean, ignited: boolean }
 
 local playerState = {}
 
 function CombatService:EquipRequest(player: Player, equip: boolean)
-    local state = playerState[player] or { equipped = false, ignite = false }
+    local state = playerState[player] or { equipped = false, ignited = false }
     state.equipped = equip 
     if not equip then
         state.ignited = false 
@@ -29,10 +29,10 @@ function CombatService:IgniteRequest(player: Player, ignite: boolean)
     local state = playerState[player]
     if not state or not state.equipped then return end 
 
-    state.ignited = ignited
+    state.ignited = ignite
     playerState[player] = state 
 
-    self.Client.IgniteChanged:FireAll(player, ignited)
+    self.Client.IgniteChanged:FireAll(player, ignite)
 end 
 
 function CombatService:KnitInit()
