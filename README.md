@@ -1,6 +1,6 @@
 # Galactic-Hub
 
-I programmed this project for someone on **Galactic-Hub**, but it is now **discontinued**. The repository is public for reference and learning.
+I programmed this project for someone, a game called **Galactic**, but it is now **discontinued**. The repository is public for reference and learning.
 
 **Repository:** https://github.com/Ecliptorhizes/Galactic-Hub
 
