@@ -6,20 +6,18 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- Get UI references (from StarterGui)
 local loadingScreen = playerGui:WaitForChild("LoadingScreen")
-local mainUi = playerGui:WaitForChild("MainUi")
+local mainUi = playerGui:FindFirstChild("MainUi")
 
 -- Initial state: show loading, hide main menu
 loadingScreen.Enabled = true
-mainUi.Enabled = false
+if mianUi then
+    mainUi.Enabled = false
+end 
 
 -- Get loading bar with path fallback
-local holder = loadingScreen:FindFirstChild("Background")
-    and loadingScreen.Background:FindFirstChild("Dark")
-    and loadingScreen.Background.Dark:FindFirstChild("Holder")
-
 local barHolder = holder and holder:FindFirstChild("barHolder")
 local loadingBar = (barHolder and barHolder:FindFirstChild("loadingBar")) or (holder and holder:FindFirstChild("loadingBar"))
-local loadingNumber = holder and holder:FindFirstChild("LoadingNumber")
+local loadingNumber = (holder and holder:FindFirstChild("LoadingNumber")) or (dark and dark:FindFirstChild("LoadingNumber"))
 
 -- Smooth loading bar animation (size only: 0.001 -> 1.003 on X scale)
 local targetProgress = 0
@@ -73,27 +71,33 @@ local function run()
 
     setProgress(50)
 
-    local isHub = table.find(HubConfig.HubPlaceIds or { PlaceIds.Hub }, game.PlaceId) ~= nil
+    local placeId = game.PlaceIds
+    local isHub = table.find(HubConfig.HubPlaceIds or { PlaceIds.Hub }, placeId) ~= nil
+    local isIlum = (placeId == PlaceIds.Ilum)
+    local isCoruscant = (placeId == PlaceIds.Coruscant)
+
 
     local clientFolder = script.Parent
     local controllersFolder = clientFolder:FindFirstChild("controllers") or player.PlayerScripts:FindFirstChild("controllers")
 
     if not controllersFolder then
-        warn("[Client] ERROR: controllers folder not found. HubController will not load. Check Rojo sync (Client should have controllers/HubController).")
+        warn("[Client] ERROR: controllers folder not found")
     elseif isHub then
         local hubController = controllersFolder:FindFirstChild("HubController")
-        if hubController then
-            require(hubController)
-        else
-            warn("[Client] ERROR: HubController module not found in controllers folder.")
-        end
-    else
+        if hubController then require(hubController) end 
+    elseif isIlum then 
+        local ilumController = controllersFolder:FindFirstChild("ilumController")
+        if ilumController then 
+            require(ilumController)
+        else 
+            local combatController = controllersFolder:FindFirstChild("CombatController")
+            if combatController then require(combatController) end 
+        end 
+    elseif isCoruscant then 
         local combatController = controllersFolder:FindFirstChild("CombatController")
-        if combatController then
-            require(combatController)
-        end
-    end
-
+        if combatController then require(combatController) end 
+    end 
+        
     setProgress(70)
 
     Knit.Start():await()
@@ -113,7 +117,9 @@ local function run()
     task.wait(0.5)
 
     loadingScreen.Enabled = false
-    mainUi.Enabled = true
+    if mainUi then 
+        mainUi.Enabled = true 
+    end
 end
 
 task.spawn(function()
